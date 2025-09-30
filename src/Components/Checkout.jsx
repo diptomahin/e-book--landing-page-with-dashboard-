@@ -1,49 +1,88 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Download, CheckCircle } from "lucide-react";
+
 const Checkout = () => {
   const [orderSuccess, setOrderSuccess] = useState(false);
-  const [downloadLink, setDownloadLink] = useState("");
-
-  // Form state
+  const [downloadLink, setDownloadLink] = useState("/download/magic_score_ebook.pdf");
   const [formData, setFormData] = useState({
     fullName: "",
     address: "",
     phone: "",
     email: "",
   });
-
-  // Button state
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [paymentID, setPaymentID] = useState("");
+  const [isPolling, setIsPolling] = useState(false);
 
-  // Handle form input changes
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setOrderSuccess(true);
-    setDownloadLink("/Magic_Score_eBook.pdf");
-    // Start loading
     setIsLoading(true);
-    setIsSuccess(false);
 
-    // Simulate form submission delay
-    setTimeout(() => {
-      console.log("Form Data Submitted:", formData);
+    try {
+      const res = await fetch("http://localhost:5000/api/bkash-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ formData, amount: 10 }),
+      });
 
-      // Success effect
+      const data = await res.json();
+      if (data?.bkashURL) {
+        setPaymentID(data.paymentID);
+        // Redirect user to bKash payment page
+        window.location.href = data.bkashURL;
+      } else {
+        console.error("Payment initiation failed:", data);
+        setIsLoading(false);
+      }
+    } catch (err) {
+      console.error("Error:", err);
       setIsLoading(false);
-      setIsSuccess(true);
-
-      //   // Redirect to bKash after short delay
-      //   setTimeout(() => {
-      //     window.location.href = "https://your-bkash-link.com";
-      //   }, 1000);
-    }, 1500);
+    }
   };
+
+  // Poll payment status after returning from bKash
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const returnedPaymentID = params.get("paymentID") || paymentID;
+    if (!returnedPaymentID) return;
+
+    setIsPolling(true);
+    const interval = setInterval(async () => {
+      try {
+        // Execute payment first
+        await fetch(`http://localhost:5000/api/bkash-execute/${returnedPaymentID}`, {
+          method: "POST",
+        });
+
+        // Check payment status
+        const res = await fetch(
+          `http://localhost:5000/api/payment-status/${returnedPaymentID}`
+        );
+        const data = await res.json();
+
+        if (data.status === "Success") {
+          setOrderSuccess(true);
+          setIsLoading(false);
+          setIsPolling(false);
+          clearInterval(interval);
+        } else if (data.status === "Failed") {
+          alert("Payment failed or wallet locked. Please try again.");
+          setIsLoading(false);
+          setIsPolling(false);
+          clearInterval(interval);
+        }
+      } catch (err) {
+        console.error("Polling error:", err);
+        setIsLoading(false);
+        setIsPolling(false);
+        clearInterval(interval);
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [paymentID]);
 
   return (
     <div id="checkout" className="py-20 px-4 bg-slate-900/50 min-h-screen">
@@ -53,9 +92,8 @@ const Checkout = () => {
           Complete Your Order
         </h1>
         <p className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto">
-          Fill in your billing details below and proceed to pay securely via
-          bKash. Your Magic Score eBook will be delivered immediately after
-          payment.
+          Fill in your billing details below and proceed to pay securely via bKash.
+          Your Magic Score eBook will be delivered immediately after payment.
         </p>
       </div>
 
@@ -64,73 +102,34 @@ const Checkout = () => {
         <div className="bg-slate-800/50 p-6 rounded-xl shadow-lg">
           <h2 className="text-2xl font-bold mb-6">Billing Details</h2>
           <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label className="block text-sm font-semibold mb-1">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="Full Name"
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none transition"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-1">
-                Full Address *
-              </label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                placeholder="Full Address"
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none transition"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-1">
-                Phone *
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="01XXXXXXXXX"
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none transition"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-1">
-                Email Address *
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none transition"
-                required
-              />
-            </div>
+            {["fullName", "address", "phone", "email"].map((field) => (
+              <div key={field}>
+                <label className="block text-sm font-semibold mb-1">
+                  {field === "fullName"
+                    ? "Full Name *"
+                    : field === "address"
+                    ? "Full Address *"
+                    : field === "phone"
+                    ? "Phone *"
+                    : "Email Address *"}
+                </label>
+                <input
+                  type={field === "email" ? "email" : "text"}
+                  name={field}
+                  value={formData[field]}
+                  onChange={handleChange}
+                  placeholder={field}
+                  className="w-full bg-slate-700 border border-slate-600 rounded-lg px-4 py-3 focus:border-blue-500 focus:outline-none transition"
+                  required
+                />
+              </div>
+            ))}
           </form>
         </div>
 
         {/* Right: Order Summary */}
         <div className="bg-slate-800/50 p-6 rounded-xl shadow-lg">
           <h2 className="text-2xl font-bold mb-6">Your Order</h2>
-
-          {/* Product List */}
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-4">
@@ -141,49 +140,43 @@ const Checkout = () => {
                 />
                 <span>Magic Score eBook</span>
               </div>
-              <span className="font-semibold">৳499</span>
+              <span className="font-semibold">৳10</span>
             </div>
           </div>
-
-          {/* Subtotal / Total */}
           <div className="border-t border-slate-600 mt-4 pt-4 space-y-2">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>৳499</span>
+              <span>৳10</span>
             </div>
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
-              <span className="text-blue-400">৳499</span>
+              <span className="text-blue-400">৳10</span>
             </div>
           </div>
 
-          {/* Pay Button */}
           <button
             onClick={handleSubmit}
-            disabled={isLoading || isSuccess}
+            disabled={isLoading || isPolling}
             className={`w-full mt-6 py-4 rounded-lg font-bold text-lg bg-gradient-to-r from-blue-500 to-cyan-500 transition transform hover:scale-105 flex justify-center items-center ${
-              isLoading
-                ? "opacity-70 cursor-not-allowed"
-                : "hover:shadow-lg hover:shadow-blue-500/50"
+              isLoading ? "opacity-70 cursor-not-allowed" : "hover:shadow-lg hover:shadow-blue-500/50"
             }`}
           >
             {isLoading ? (
               <span className="animate-spin border-2 border-white border-t-transparent rounded-full w-6 h-6 mr-3"></span>
-            ) : isSuccess ? (
-              "Success! Redirecting..."
+            ) : isPolling ? (
+              "Waiting for payment..."
             ) : (
               "Pay Online with bKash"
             )}
-            {!isLoading && !isSuccess && "Pay Online with bKash"}
           </button>
 
-          {/* Terms */}
           <div className="mt-4 text-xs text-gray-400">
             By placing your order, you agree to our Terms and Conditions,
             Privacy Policy, and Refund Policy.
           </div>
         </div>
       </div>
+
       {/* Success Modal */}
       {orderSuccess && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -195,9 +188,7 @@ const Checkout = () => {
             <p className="text-gray-300 mb-6">
               Your order has been received. We'll verify your payment and send
               the eBook to{" "}
-              <span className="font-semibold text-blue-400">
-                {formData.email}
-              </span>{" "}
+              <span className="font-semibold text-blue-400">{formData.email}</span>{" "}
               within 30 minutes.
             </p>
             <a
@@ -207,9 +198,7 @@ const Checkout = () => {
             >
               <Download size={20} /> Download Now
             </a>
-            <p className="text-sm text-gray-400 mb-6">
-              (Download link also sent to your email)
-            </p>
+            <p className="text-sm text-gray-400 mb-6">(Download link also sent to your email)</p>
             <button
               onClick={() => setOrderSuccess(false)}
               className="text-gray-400 hover:text-white transition"

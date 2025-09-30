@@ -119,7 +119,7 @@ export default function App() {
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <a href="/#checkout">
                   <button className="bg-gradient-to-r from-blue-500 to-cyan-500 px-8 py-4 rounded-full text-lg font-bold hover:shadow-xl hover:shadow-blue-500/50 transition transform hover:scale-105">
-                    Order Now - ৳499
+                    Order Now - ৳10
                   </button>
                 </a>
                 <button
@@ -191,7 +191,7 @@ export default function App() {
           <div className="flex justify-center mt-10">
             <a href="#checkout">
               <button className="bg-gradient-to-r from-blue-500 to-cyan-500 px-8 py-4 rounded-full text-lg font-bold hover:shadow-xl hover:shadow-blue-500/50 transition transform hover:scale-105">
-                Order Now - ৳499
+                Order Now - ৳10
               </button>
             </a>
           </div>
