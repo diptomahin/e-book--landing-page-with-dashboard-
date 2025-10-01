@@ -30,12 +30,12 @@ const Faq = () => {
   return (
     <div>
       {/* FAQ Section */}
-      <section id="faq" className="py-20 px-4">
+      <section id="faq" className="py-20 px-4 bg-white">
         <div className="container mx-auto max-w-3xl">
-          <h2 className="text-3xl md:text-5xl font-bold text-center mb-4">
+          <h2 className="text-3xl md:text-5xl text-black font-bold text-center mb-4">
             Frequently Asked Questions
           </h2>
-          <p className="text-center text-gray-400 mb-12">
+          <p className="text-center text-black mb-12">
             Everything you need to know
           </p>
 
@@ -43,7 +43,7 @@ const Faq = () => {
             {faqs.map((faq, idx) => (
               <div
                 key={idx}
-                className="bg-slate-800/50 backdrop-blur-sm rounded-xl border border-blue-500/20 overflow-hidden"
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl border border-blue-500/20 overflow-hidden"
               >
                 <button
                   onClick={() =>
@@ -59,7 +59,7 @@ const Faq = () => {
                   />
                 </button>
                 {activeAccordion === idx && (
-                  <div className="px-6 pb-6 text-gray-400">{faq.a}</div>
+                  <div className="px-6 pb-6 text-white bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">{faq.a}</div>
                 )}
               </div>
             ))}

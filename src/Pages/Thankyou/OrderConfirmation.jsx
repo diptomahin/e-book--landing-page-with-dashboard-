@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const OrderConfirmation = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const orderID = params.get("orderID");
+  const token = params.get("token"); // ✅ use token
 
   const [order, setOrder] = useState(null);
 
   useEffect(() => {
-    if (orderID) {
-      fetch(`http://localhost:5000/api/order/${orderID}`)
+    if (token) {
+      fetch(`http://localhost:5000/api/order/${token}`)
         .then((res) => res.json())
         .then((data) => setOrder(data))
         .catch(console.error);
     }
-  }, [orderID]);
+  }, [token]);
 
   if (!order) return <div className="text-white p-8">Loading invoice...</div>;
 
@@ -44,17 +44,22 @@ const OrderConfirmation = () => {
           </div>
         </div>
 
-        <a
-          href="/download/magic_score_ebook.pdf"
-          download
-          className="mt-6 inline-block bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-3 rounded-lg font-bold hover:shadow-lg hover:shadow-blue-500/50 transition"
-        >
-          Download eBook
-        </a>
+        <div className="flex flex-col md:flex-row gap-5 items-center">
+          <a
+            href={`http://localhost:5000/api/ebooks/download/ebook1.pdf?token=${order.token}`}
+            className="mt-6 inline-block bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-3 rounded-lg font-bold hover:shadow-lg hover:shadow-blue-500/50 transition"
+          >
+            Download eBook
+          </a>
+          <Link to={"/"}
+            className="mt-6 inline-block bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-3 rounded-lg font-bold hover:shadow-lg hover:shadow-blue-500/50 transition"
+          >
+            Home
+          </Link>
+        </div>
       </div>
     </div>
   );
 };
 
 export default OrderConfirmation;
-
