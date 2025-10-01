@@ -20,7 +20,7 @@ const Dashboard = () => {
 
   // Fetch orders
   useEffect(() => {
-    fetch("http://localhost:5000/api/orders")
+    fetch("https://api.sparkaims.com/api/orders")
       .then((res) => res.json())
       .then((data) => {
         setOrders(data);

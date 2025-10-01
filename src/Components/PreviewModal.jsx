@@ -39,7 +39,7 @@ const PreviewModal = ({ showPreview, setShowPreview }) => {
             {/* PDF Content */}
             <div className="flex-1 overflow-y-auto p-6 bg-white text-gray-800 flex justify-center">
               <Document
-                file={`http://localhost:5000/api/ebooks/preview/preview1.pdf`}
+                file={`https://api.sparkaims.com/api/ebooks/preview/preview1.pdf`}
                 onLoadSuccess={onDocumentLoadSuccess}
                 loading={<p>Loading PDF...</p>}
               >

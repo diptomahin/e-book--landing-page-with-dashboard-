@@ -1,91 +1,83 @@
-import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/Page/TextLayer.css";
-import "react-pdf/dist/Page/AnnotationLayer.css";
+import { useState, useRef } from "react";
 
-// Worker for pdfjs-dist v5.x
-import pdfWorker from "pdfjs-dist/build/pdf.worker.mjs?url";
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
-import { useState } from "react";
 const Preview = () => {
-  const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
+    const pages = [
+        "/preview/preview1_page-0001.jpg",
+        "/preview/preview1_page-0002.jpg",
+        "/preview/preview1_page-0003.jpg",
+        "/preview/preview1_page-0004.jpg",
+        "/preview/preview1_page-0005.jpg",
+        "/preview/preview1_page-0006.jpg",
+        "/preview/preview1_page-0007.jpg",
+        "/preview/preview1_page-0008.jpg",
+        "/preview/preview1_page-0009.jpg",
+        "/preview/preview1_page-0010.jpg",
+        "/preview/preview1_page-0011.jpg",
+        "/preview/preview1_page-0012.jpg",
+        "/preview/preview1_page-0013.jpg",
+        "/preview/preview1_page-0014.jpg",
+        "/preview/preview1_page-0015.jpg",
+        "/preview/preview1_page-0016.jpg",
+        "/preview/preview1_page-0017.jpg",
+    ];
 
-  // Example: preview book1.pdf from backend
-  const pdfUrl = "http://localhost:5000/api/ebooks/preview/preview1.pdf";
+    const [currentPage, setCurrentPage] = useState(0);
+    const containerRef = useRef(null);
 
-  const onDocumentLoadSuccess = ({ numPages }) => {
-    setNumPages(numPages);
-  };
+    const nextPage = () => setCurrentPage((prev) => Math.min(prev + 1, pages.length - 1));
+    const prevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 0));
 
-  return (
-    <section id="preview" className="py-20 px-4 bg-white">
-      <div className="container mx-auto max-w-4xl">
-        <h2 className="text-3xl text-black md:text-5xl font-bold text-center mb-4">
-          Preview the eBook
-        </h2>
-        <p className="text-center text-black mb-12">
-          Flip through a few pages before purchasing
-        </p>
+    return (
+        <section className="py-16 px-4 bg-gray-50">
+            <div className="max-w-4xl mx-auto text-center">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                    Preview Your eBook
+                </h2>
+                <p className="text-gray-600 mb-10 text-lg">
+                    Flip through a few pages and see what you’ll get before purchasing.
+                </p>
 
-        <div className="bg-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-4">
-            <div className="flex items-center justify-between text-white">
-              <span className="font-semibold">
-                Page {pageNumber} of {numPages || "…"}
-              </span>
-              <span className="text-sm">Preview Version</span>
+                {/* PDF as Image */}
+                <div
+                    ref={containerRef}
+                    className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 flex justify-center items-center"
+                    style={{ height: "600px" }}
+                >
+                    <img
+                        src={pages[currentPage]}
+                        alt={`Page ${currentPage + 1}`}
+                        style={{
+                            height: "100%", // always fit container height
+                            width: "auto",
+                            maxWidth: "100%",
+                        }}
+                    />
+                </div>
+
+                {/* Page Navigation */}
+                <div className="mt-6 flex justify-center gap-4 flex-wrap">
+                    <button
+                        onClick={prevPage}
+                        disabled={currentPage === 0}
+                        className="px-6 py-2 bg-indigo-500 text-white rounded-lg shadow hover:bg-indigo-600 disabled:opacity-50 transition"
+                    >
+                        Previous
+                    </button>
+                    <button
+                        onClick={nextPage}
+                        disabled={currentPage === pages.length - 1}
+                        className="px-6 py-2 bg-indigo-500 text-white rounded-lg shadow hover:bg-indigo-600 disabled:opacity-50 transition"
+                    >
+                        Next
+                    </button>
+                </div>
+
+                <p className="mt-2 text-gray-500">
+                    Page {currentPage + 1} of {pages.length}
+                </p>
             </div>
-          </div>
-
-          {/* PDF Preview */}
-          <div className="flex justify-center bg-white p-4 min-h-[500px]">
-            <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess}>
-              <Page pageNumber={pageNumber} width={600} />
-            </Document>
-          </div>
-
-          {/* Controls */}
-          <div className="bg-slate-800 p-4 flex justify-between items-center">
-            <button
-              onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
-              disabled={pageNumber === 1}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition"
-            >
-              Previous
-            </button>
-            <div className="flex gap-2">
-              {Array.from(new Array(numPages), (el, index) => (
-                <button
-                  key={index}
-                  onClick={() => setPageNumber(index + 1)}
-                  className={`w-3 h-3 rounded-full transition ${
-                    index + 1 === pageNumber ? "bg-blue-500" : "bg-gray-600"
-                  }`}
-                />
-              ))}
-            </div>
-            <button
-              onClick={() => setPageNumber(Math.min(numPages, pageNumber + 1))}
-              disabled={pageNumber === numPages}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-600 transition"
-            >
-              Next
-            </button>
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="text-center mt-8">
-          <a href="#checkout">
-            <button className="bg-gradient-to-r from-blue-500 to-cyan-500 px-8 py-3 rounded-full font-bold text-white hover:shadow-lg hover:shadow-blue-500/50 transition transform hover:scale-105">
-              Get Full Access Now
-            </button>
-          </a>
-        </div>
-      </div>
-    </section>
-  );
+        </section>
+    );
 };
 
 export default Preview;

@@ -10,7 +10,7 @@ const OrderConfirmation = () => {
 
   useEffect(() => {
     if (token) {
-      fetch(`http://localhost:5000/api/order/${token}`)
+      fetch(`https://api.sparkaims.com/api/order/${token}`)
         .then((res) => res.json())
         .then((data) => setOrder(data))
         .catch(console.error);
@@ -46,7 +46,7 @@ const OrderConfirmation = () => {
 
         <div className="flex flex-col md:flex-row gap-5 items-center">
           <a
-            href={`http://localhost:5000/api/ebooks/download/ebook1.pdf?token=${order.token}`}
+            href={`https://api.sparkaims.com/api/ebooks/download/ebook1.pdf?token=${order.token}`}
             className="mt-6 inline-block bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-3 rounded-lg font-bold hover:shadow-lg hover:shadow-blue-500/50 transition"
           >
             Download eBook

@@ -21,7 +21,7 @@ const Checkout = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/bkash-checkout", {
+      const res = await fetch("https://api.sparkaims.com/api/bkash-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ formData, amount: 10 }),
@@ -52,13 +52,13 @@ const Checkout = () => {
     const interval = setInterval(async () => {
       try {
         // Execute payment first
-        await fetch(`http://localhost:5000/api/bkash-execute/${returnedPaymentID}`, {
+        await fetch(`https://api.sparkaims.com/api/bkash-execute/${returnedPaymentID}`, {
           method: "POST",
         });
 
         // Check payment status
         const res = await fetch(
-          `http://localhost:5000/api/payment-status/${returnedPaymentID}`
+          `https://api.sparkaims.com/api/payment-status/${returnedPaymentID}`
         );
         const data = await res.json();
 
