@@ -6,11 +6,11 @@ const Hero = () => {
       <div className="container mx-auto">
         {/* Quote Block */}
         <div className="max-w-3xl mx-auto text-center pb-10">
-          <p className="text-lg md:text-2xl italic text-gray-300 relative">
+          <p className="text-lg md:text-2xl italic text-gray-300 ">
             <span className="text-5xl font-bold text-white">“</span>
             Secret Tricks & Proven Techniques যা দিয়ে IELTS রাইটিং টাস্ক ২ এ{" "}
-            <br />
-            7-{""}7+{""}হবে{""}আরো{""}সহজ।
+            <br  />
+            7{" "}-{" "}7+{" "}হবে{" "}আরো{" "}সহজ।
             <span className=" text-5xl text-white">”</span>
           </p>
         </div>
@@ -29,7 +29,7 @@ const Hero = () => {
             {/* Bonus Text */}
             <div className="relative z-20 mt-4 text-center">
               <span className="inline-block bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-6 py-2 rounded-full text-sm md:text-base font-semibold shadow-lg">
-                🎁 Bonus: 2 free classes with every purchase!
+                🎁 Bonus: 2 Online free classes with every purchase for a limited time!
               </span>
             </div>
 

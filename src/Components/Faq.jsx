@@ -18,12 +18,8 @@ const Faq = () => {
       a: "Send the amount to our bKash merchant number, then fill in the checkout form with your transaction ID. Our team will verify and send your eBook.",
     },
     {
-      q: "Is there a money-back guarantee?",
-      a: "Yes! If you're not satisfied within 7 days, we offer a full refund. Just email us with your concern.",
-    },
-    {
       q: "Can I get support if I have questions?",
-      a: "Absolutely! Email us at support@magicscore.com and we'll respond within 24 hours.",
+      a: "Absolutely! Email us at support@sparkaims.com and we'll respond within 24 hours.",
     },
   ];
 
